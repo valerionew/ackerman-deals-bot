@@ -43,13 +43,13 @@ def start(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     update.message.reply_markdown_v2(
-        fr'Hi {user.mention_markdown_v2()}\! Send me a number to create your _*Ackermann deal scheme*_\!',
+        fr'Hi {user.mention_markdown_v2()}\! Send me a number to create your _*Ackerman deal scheme*_\!',
     )
 
 
 def help_command(update: Update, context: CallbackContext) -> None:
     """Send a message when the command /help is issued."""
-    update.message.reply_markdown_v2('Send me a number to create your _*Ackermann deal scheme*_!')
+    update.message.reply_markdown_v2('Send me a number to create your _*Ackerman deal scheme*_!')
 
 
 def reply(update: Update, context: CallbackContext) -> None:
@@ -61,7 +61,7 @@ def reply(update: Update, context: CallbackContext) -> None:
     else:
       # lorenzo took a bit of pride in this
       def format_message(val):
-        return "_*Ackermann deal scheme*_: \n\n" + "\n".join(f"*_{v}_*%: {round(float (val * v / 100), 2)}" for v in  [65, 85, 95, 100]).replace(".", "\.")
+        return "_*Ackerman deal scheme*_: \n\n" + "\n".join(f"*_{v}_*%: {round(float (val * v / 100), 2)}" for v in  [65, 85, 95, 100]).replace(".", "\.")
       update.message.reply_markdown_v2(format_message(num), 
       reply_to_message_id=update.message.message_id)
 
