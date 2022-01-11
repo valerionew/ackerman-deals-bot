@@ -1,9 +1,15 @@
-
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    CallbackContext,
+    Error,
+)
+import ujson
 
 import logging
-import secrets
 
 """
 BotFather commands:
@@ -13,12 +19,15 @@ buy - Sets Ackerman scheme to buy
 sell - Sets Ackerman scheme to sell
 """
 
+
 class AckermanBot:
     def __init__(self):
         """Start the bot."""
         self._values = {"buy": [65, 85, 95, 100], "sell": [135, 115, 105, 100]}
+        # load token from file
+        self._loadToken()
         # Create the Updater and pass it your bot's token.
-        self._updater = Updater(secrets.TOKEN)
+        self._updater = Updater(self._token)
 
         # Get the dispatcher to register handlers
         self._dispatcher = self._updater.dispatcher
@@ -32,7 +41,9 @@ class AckermanBot:
         self._dispatcher.add_error_handler(self._errorHandler)
 
         # on non command i.e message - echo the message on Telegram
-        self._dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, self._replyCommand))
+        self._dispatcher.add_handler(
+            MessageHandler(Filters.text & ~Filters.command, self._replyCommand)
+        )
 
     def start(self):
         logging.info("Bot started")
@@ -45,14 +56,28 @@ class AckermanBot:
         # start_polling() is non-blocking and will stop the bot gracefully.
         self._updater.idle()
 
+    def _loadToken(self, path: str = "secrets.json") -> None:
+        try:
+            with open(path, "r") as f:
+                self._token = ujson.load(f)["token"]
+        except (FileNotFoundError, ValueError):
+            logging.error(
+                f"File {path} not found and has been created. Please set a token."
+            )
+            with open(path, "w") as f:
+                ujson.dump({"token": "YOUR-TOKEN-HERE"}, f, indent=4)
+                self._token = None
+
     def _formatMessage(self, val: float, mode: int = 0) -> str:
         # sadly, I had to partially un fuck this function
         # source values
-        computed = [str(round(float (val * v / 100), 2)).replace(".", "\.") for v in self._values[mode]]
-        return (
-            f"_*Ackerman deal {mode} scheme*_: \n\n" +
-            "\n".join(f"_*{self._values[mode][x]}*_%: {computed[x]}" for x in range(len(computed)))
-            )
+        computed = [
+            str(round(float(val * v / 100), 2)).replace(".", "\.")
+            for v in self._values[mode]
+        ]
+        return f"_*Ackerman deal {mode} scheme*_: \n\n" + "\n".join(
+            f"_*{self._values[mode][x]}*_%: {computed[x]}" for x in range(len(computed))
+        )
 
     def _errorHandler(self, update: Update, context: CallbackContext) -> None:
         logging.error(f"Update {update} caused error {context.error}")
@@ -68,16 +93,16 @@ class AckermanBot:
     def _startCommand(self, update: Update, context: CallbackContext) -> None:
         """Send a message when the command /start is issued."""
         update.message.reply_markdown_v2(
-            'Hi {user.mention_markdown_v2()}\! Send me a number to create your _*Ackerman deal scheme*_\!',
+            "Hi {user.mention_markdown_v2()}\! Send me a number to create your _*Ackerman deal scheme*_\!",
         )
         # udpdate current version
         context.user_data["mode"] = "buy"
 
-
     def _helpCommand(self, update: Update, context: CallbackContext) -> None:
         """Send a message when the command /help is issued."""
-        update.message.reply_markdown_v2('Send me a number to create your _*Ackerman deal scheme*_!')
-
+        update.message.reply_markdown_v2(
+            "Send me a number to create your _*Ackerman deal scheme*_!"
+        )
 
     def _replyCommand(self, update: Update, context: CallbackContext) -> None:
         """Send the message"""
@@ -87,10 +112,10 @@ class AckermanBot:
         except ValueError:
             update.message.reply_text("I'd need a number, not a string")
         else:
-        # lorenzo took a bit of pride in this
+            # lorenzo took a bit of pride in this
             update.message.reply_markdown_v2(
                 self._formatMessage(num, mode=mode),
-                reply_to_message_id=update.message.message_id
+                reply_to_message_id=update.message.message_id,
             )
 
     def _buyCommand(self, update: Update, context: CallbackContext) -> None:
