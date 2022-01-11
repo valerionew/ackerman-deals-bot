@@ -26,20 +26,21 @@
 import logging
 
 
-
 from bot import AckermanBot
 
 
 def main() -> None:
     # Enable logging
     logging.basicConfig(
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         level=logging.INFO,
-        filename=__file__.replace(".py", ".log")
+        filename="logging.log",
+        filemode="w",
     )
 
     b = AckermanBot()
     b.start()
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
