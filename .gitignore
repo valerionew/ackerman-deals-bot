@@ -1,3 +1,5 @@
-secrets.py
-venv
+secrets.*
 *.log
+venv
+__pycache__
+.vscode
