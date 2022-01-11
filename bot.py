@@ -5,7 +5,6 @@ from telegram.ext import (
     MessageHandler,
     Filters,
     CallbackContext,
-    Error,
 )
 import ujson
 
